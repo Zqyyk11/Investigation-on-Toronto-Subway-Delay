@@ -1,13 +1,12 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "An Analysis of Subway Delays in Toronto: Insights from 2023 TTC Data"
+subtitle: "Diving deep into subway delays"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: LINK."
+  - Charlie Zhang
+thanks: "Code and data are available at: https://github.com/Zqyyk11/Term-Paper-1."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This report presents an investigation into subway delays in Toronto using data from the Toronto Transit Commission (TTC) for the year 2023. The analysis examines patterns of delays across various subway stations, lines, and days of the week, with the goal of identifying critical factors that contribute to service disruptions. Key findings show that Monday and Thursday experienced the highest number of delays, with the Bloor-Danforth (BD) line being the most affected. These insights provide a data-driven foundation for improving operational efficiency and minimizing service interruptions in the future."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -17,205 +16,126 @@ bibliography: references.bib
 #| include: false
 #| warning: false
 #| message: false
-
+library(ggplot2)
+library(here)
+library(knitr)
+library(opendatatoronto)
 library(tidyverse)
-library(palmerpenguins)
-```
+library(dplyr)
 
+cleaned_data = read_csv(here::here('data/analysis_data/cleaned_subway_delay_data.csv'))
+ 
+```
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
+Public transit plays a vital role in the daily lives of millions of people in urban centers around the world. In Toronto, the subway system, operated by the Toronto Transit Commission (TTC), serves as a backbone for many commuters. However, delays in subway services can cause significant inconvenience and disrupt the city’s flow of traffic. In 2023, Toronto’s subway system faced numerous delays, which are the focus of this report.
 
-The remainder of this paper is structured as follows. @sec-data....
+This analysis uses a comprehensive dataset of subway delays from the TTC to investigate the nature and extent of service disruptions. Specifically, the report aims to answer the following questions:
 
+-   Which days of the week are most prone to delays?
+-   What are the most affected subway lines and stations?
+-   What times of day experience the most delays?
 
+By answering these questions, the report seeks to provide actionable insights for improving the reliability of Toronto’s subway system, reducing the frequency and duration of delays, and enhancing the overall commuting experience.
+
+The findings in this report are based on data-driven analyses and visualizations, which highlight delay trends throughout the year. This investigation serves as a foundation for further research into the causes of delays and offers guidance for policy makers and transit authorities in addressing key operational challenges.
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+The data utilized in this report is sourced from Open Data Toronto and was imported using the opendatatoronto library [@gelfand2022]. The specific dataset used for analyzing TTC subway delays in Toronto is the "TTC Subway & SRT Train Service Delay Data" dataset [@toronto2024. All data analysis was conducted using R [@r2023], with the assistance of several key packages, including tidyverse [@wickham2019], dplyr [@wickham2023dplyr],here [@mueller2020] janitor [@firke2023], ggplot2 [@wickham2016], and knitr [@knitr].
 
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
+To transform the raw data into a clean, analysis-ready format, several preprocessing steps were carried out using R. First, unnecessary columns that did not contribute to the analysis, such as metadata or irrelevant identifiers, were removed to streamline the dataset. Using the dplyr package, specific columns were selected based on relevance to subway delays, such as date, time, station, line, and delay duration. The data was further cleaned by handling any missing or inconsistent values with the janitor package to ensure data integrity. Any outliers or erroneous entries were also identified and either corrected or removed as appropriate. These steps allowed for the creation of a clean dataset, which provided a solid foundation for the subsequent analysis. The entire process was conducted through efficient R code, leveraging the functionality of packages like dplyr for filtering and selection, and janitor for data cleaning. 
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
+```{r,echo=FALSE}
+library(ggplot2)
+
+# Assuming your cleaned data is in 'subway_data' and it has a 'Day' column
+day_delay_summary <- aggregate(cleaned_data$`Min Delay`, by=list(cleaned_data$Day), FUN=sum)
+
+# Plotting the total delays by day of the week
+ggplot(day_delay_summary, aes(x=Group.1, y=x)) +
+  geom_bar(stat="identity", fill="skyblue") +
+  labs(title="Total Delays by Day of the Week (in minutes)",
+       x="Day of the Week", y="Total Delay (Minutes)") +
   theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Talk more about it.
+The bar chart shows the total minutes of delays across different days of the week, with Mondays experiencing the highest delay times at 10,494 minutes, followed closely by Thursday and Friday. These days likely face more operational challenges due to higher ridership at the start and end of the workweek. In contrast, weekends see fewer delays, possibly because of lower ridership and reduced service frequency, leading to less strain on the subway system. \\ \\
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+```{r,echo=FALSE}
+# Aggregating the data by subway line
+line_delay_summary <- aggregate(cleaned_data$`Min Delay`, by=list(cleaned_data$Line), FUN=sum)
 
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
-
-analysis_data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
+# Plotting the total delays by subway line
+ggplot(line_delay_summary, aes(x=Group.1, y=x)) +
+  geom_bar(stat="identity", fill="salmon") +
+  labs(title="Total Delays by Subway Line (in minutes)",
+       x="Subway Line", y="Total Delay (Minutes)") +
   theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Talk way more about it. 
+The bar chart shows the total delay minutes per subway line, with the Yonge-University (YU) line experiencing the most delays, followed by the Bloor-Danforth (BD) line. The high delay times on the YU Line are likely due to its status as one of the busiest lines, serving downtown Toronto and major commuter hubs. The BD Line also faces substantial delays, reflecting its heavy operational load. In contrast, other lines such as the Sheppard (SRT) experience significantly fewer delays, likely due to lower ridership or reduced service frequency. \\ \\
 
+```{r,echo=FALSE}
+# Aggregating and selecting the top 10 stations with the most delays
+station_delay_summary <- aggregate(cleaned_data$`Min Delay`, by=list(cleaned_data$Station), FUN=sum)
+top_10_stations <- station_delay_summary[order(-station_delay_summary$x),][1:10,]
 
+# Plotting total delays by top 10 stations
+ggplot(top_10_stations, aes(x=Group.1, y=x)) +
+  geom_bar(stat="identity", fill="lightgreen") +
+  labs(title="Total Delays by Top 10 Stations (in minutes)",
+       x="Station", y="Total Delay (Minutes)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
-# Model
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
-## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
+The bar chart highlights the top 10 stations with the highest delay minutes, with Kennedy BD Station leading, followed by Eglinton and Kipling stations. Kennedy, as a major terminal on the Bloor-Danforth line, likely faces operational challenges contributing to its delays. Eglinton Station, undergoing significant construction due to transit expansions, also experiences high delays. Key transfer hubs like Kipling and Bloor, which handle large passenger volumes, further contribute to increased delays at these stations.
 
 # Results
 
-Our results are summarized in @tbl-modelresults.
+The analysis of subway delays in Toronto for 2023 reveals significant patterns across days of the week, subway lines, and specific stations. Mondays experienced the most delays, followed closely by Thursday and Friday, suggesting that the beginning and end of the workweek are the most challenging periods for subway operations. This pattern may be linked to increased ridership and operational pressures during these days. In terms of subway lines, the Yonge-University (YU) line recorded the highest delay minutes, likely due to its extensive coverage of key commuter areas, including downtown Toronto, where traffic and operational complexities are higher. The Bloor-Danforth (BD) line also saw substantial delays, reflecting its heavy usage and operational load. Meanwhile, other lines, such as the Sheppard (SRT), experienced fewer delays, which can be attributed to lower ridership and less frequent service. At the station level, Kennedy BD Station led in delay minutes, followed by Eglinton and Kipling stations, all of which are either major transfer hubs or subject to ongoing construction, leading to operational disruptions. The results highlight the need for focused operational improvements at key lines and stations, particularly during peak periods at the start and end of the workweek. \\
 
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
+```{r,echo=FALSE}
+# Install required packages if necessary
+# install.packages("ggplot2")
+library(ggplot2)
+library(dplyr)
+cleaned_subway_data <- cleaned_data
 
-library(rstanarm)
+# Assuming cleaned_subway_data is already loaded, we'll remove all rows with zero delay
+cleaned_subway_data <- cleaned_subway_data %>% 
+  filter(`Min Delay` > 0)
 
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
+# Create a new 'Category' column combining 'Line' and 'Day of the Week'
+cleaned_subway_data <- cleaned_subway_data %>%
+  mutate(Category = paste(Line, Day))
+
+# Aggregate the data by 'Category'
+combined_summary <- cleaned_subway_data %>%
+  group_by(Category) %>%
+  summarize(Delay = sum(`Min Delay`))
+
+# Plot the combined data without zero delays
+ggplot(combined_summary, aes(x = Category, y = Delay, fill = Category)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(title = "Combined Subway Delay Analysis by Line and Day of the Week (2023)",
+       x = "Line and Day of the Week", y = "Total Delay (Minutes)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip()  # Flip for better readability if needed
+
 ```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
 
 # Discussion
 
-## First discussion point {#sec-first-point}
+The analysis of subway delays in Toronto for 2023 reveals several important insights into the performance of the city's subway system. Delays are more pronounced during the workweek, particularly on Mondays and Thursdays, suggesting that the operational strain is highest at the start and end of the week, likely due to increased commuter traffic. The Yonge-University (YU) and Bloor-Danforth (BD) lines experience the most delays, reflecting their roles as major transit arteries with high passenger volumes and frequent service demands. Stations like Kennedy and Eglinton, which are key transfer points and hubs of construction activity, are more prone to delays, pointing to infrastructure and operational challenges that exacerbate service interruptions.
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
+The removal of zero-delay entries further emphasizes that certain stations and lines consistently face challenges, while others see minimal delays. This highlights potential areas for targeted improvements, particularly on high-traffic lines and during peak commuting days. To reduce delays, strategic investments in infrastructure and more efficient scheduling could mitigate the operational pressures observed on busy lines and at critical stations. In addition, proactive measures, such as real-time monitoring and passenger load management, could further improve service reliability. Overall, the data points to a need for a more flexible and robust transit system capable of handling fluctuations in demand while minimizing disruptions.
 
 \newpage
-
-\appendix
-
-# Appendix {-}
-
-
-# Additional data details
-
-# Model details {#sec-model-details}
-
-## Posterior predictive check
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
-
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
-
-
-
-\newpage
-
 
 # References
-
-
