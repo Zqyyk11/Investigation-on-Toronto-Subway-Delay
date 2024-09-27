@@ -61,9 +61,8 @@ cleaned_data[, 1:7] %>% head() %>% knitr::kable()
 
 ## Subway delays by day of the week
 ```{r,echo=FALSE}
-library(ggplot2)
 
-# Assuming your cleaned data is in 'subway_data' and it has a 'Day' column
+#Create the summary
 day_delay_summary <- aggregate(cleaned_data$`Min Delay`, by=list(cleaned_data$Day), FUN=sum)
 
 # Plotting the total delays by day of the week
@@ -147,6 +146,7 @@ ggplot(delay_summary, aes(x = period, y = total_delay_minutes, fill = period)) +
 
 The examination of subway disruptions in Toronto indicates a contrast between busy and quieter times of the day when it comes to delays. With less crowded periods encountering much longer total delay durations compared to peak hours despite the higher number of passengers and operational demands during those busier times when the transit system seems to focus on efficiency and manages to have fewer delays than, during the less busy times. Delays are more common during quieter hours due to frequent services and maintenance work being carried out then to avoid disruptions during prime commute times also fewer resources being available could lead to longer delays when problems occur. It seems that the system handles high demand situations effectively but could possibly do better at reducing interruptions during quieter times to maintain service all day long. 
 
+\newpage
 
 # Results
 
@@ -166,9 +166,13 @@ The overall analysis gives an overview of subway disruptions in Toronto for the 
 
 # Discussion
 
-The analysis of subway delays in Toronto for 2023 reveals several important insights into the performance of the city's subway system. Delays are more pronounced during the workweek, particularly on Mondays and Thursdays, suggesting that the operational strain is highest at the start and end of the week, likely due to increased commuter traffic. The Yonge-University (YU) and Bloor-Danforth (BD) lines experience the most delays, reflecting their roles as major transit arteries with high passenger volumes and frequent service demands. Stations like Kennedy and Eglinton, which are key transfer points and hubs of construction activity, are more prone to delays, pointing to infrastructure and operational challenges that exacerbate service interruptions.
+The examination of delays, in the Toronto subway system reveals the challenges of managing a public transportation network efficiently and reliably. A notable discovery is the increase in delays during busy hours compared to peak periods – a surprising trend that goes against the assumption of more disruptions during high demand peak hours. The information indicates that when there are trains running and passengers must wait longer during off hours due to reduced service frequency which cause delays to have an impact. Moreover scheduled maintenance activities that are typically carried out during these quieter times may worsen the situation by causing delays to build up progressively over time. This situation underscores a chance for the TTC to reassess its off hour schedules and resource distribution in order to minimize delays during periods of passenger traffic. 
 
-The removal of zero-delay entries further emphasizes that certain stations and lines consistently face challenges, while others see minimal delays. This highlights potential areas for targeted improvements, particularly on high-traffic lines and during peak commuting days. To reduce delays, strategic investments in infrastructure and more efficient scheduling could mitigate the operational pressures observed on busy lines and at critical stations. In addition, proactive measures, such as real-time monitoring and passenger load management, could further improve service reliability. Overall, the data points to a need for a more flexible and robust transit system capable of handling fluctuations in demand while minimizing disruptions.
+During hours the transportation system faces stress but appears focused on maintaining punctuality for trains. This indicates a strategy in handling rush periods by addressing operational challenges to prevent minor issues from causing major delays. Nevertheless the clustering of delays on weekdays, like Mondays and towards the weeks end implies that commuter patterns greatly impact the systems effectiveness. On Mondays, in particular there may be delays because of the influx of commuters heading back to work after the weekend break; while on Thursdays and Fridays we tend to see increased delays as folks get ready, for their weekend plans ahead of time.It might be helpful for the TTC to take note of these trends and adjust their resources accordingly to manage operations smoothly. 
+
+The noticeable delays experienced on subway routes such as the Yonge–University and Bloor–Danforth lines demonstrate the difficulties in catering to populated areas with high passenger demand.These routes are lifelines for Torontos commuters and any disruptions here can cause far reaching effects throughout the city.Targeted approaches like upgrading signaling systems increasing train frequency and offering updates could be considered to improve service dependability.In addition, requiring traffic control to supervise site could also enhance the movement of passengers. 
+
+In summary even though Toronto's subway system seems to handle peak hours despite the number of passengers. The examination reveals weaknesses during less busy times and, at specific stations and routes. To improve the situation the TTC could address these issues by improving services during off hours targeting stations with frequent delays and better managing resources on busy weekdays. These steps would greatly improve the system's effectiveness making the subway a more dependable and sturdy transportation option for the people of Toronto. 
 
 \newpage
 
