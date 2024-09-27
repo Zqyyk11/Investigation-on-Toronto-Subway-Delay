@@ -8,7 +8,6 @@ date: "2024-09-23"
 date-format: long
 abstract: "This report presents an investigation into subway delays in Toronto using data from the Toronto Transit Commission (TTC) for the year 2023. The analysis examines patterns of delays across various subway stations, lines, and days of the week, with the goal of identifying critical factors that contribute to subway delays. Key findings show that Monday experienced the highest number of delays, with the Bloor-Danforth (BD) line being the most affected. These insights provide a data-driven foundation for improving operational efficiency and minimizing service interruptions in the future."
 format: pdf
-fontsize: 12pt
 toc: true
 number-sections: true
 bibliography: references.bib
