@@ -1,17 +1,18 @@
 ---
-title: "An Analysis of Subway Delays in Toronto: Insights from 2023 TTC Data"
+title: "An Investigation of Subway Delays in Toronto: Insights from 2023 TTC Data"
 subtitle: "Diving deep into subway delays"
 author: 
   - Charlie Zhang
-thanks: "Code and data are available at: https://github.com/Zqyyk11/Term-Paper-1."
-date: today
+thanks: "Code and data are available at: https://github.com/Zqyyk11/Investigation-on-Toronto-Subway-Delay."
+date: "2024-09-23"
 date-format: long
-abstract: "This report presents an investigation into subway delays in Toronto using data from the Toronto Transit Commission (TTC) for the year 2023. The analysis examines patterns of delays across various subway stations, lines, and days of the week, with the goal of identifying critical factors that contribute to service disruptions. Key findings show that Monday and Thursday experienced the highest number of delays, with the Bloor-Danforth (BD) line being the most affected. These insights provide a data-driven foundation for improving operational efficiency and minimizing service interruptions in the future."
+abstract: "This report presents an investigation into subway delays in Toronto using data from the Toronto Transit Commission (TTC) for the year 2023. The analysis examines patterns of delays across various subway stations, lines, and days of the week, with the goal of identifying critical factors that contribute to subway delays. Key findings show that Monday experienced the highest number of delays, with the Bloor-Danforth (BD) line being the most affected. These insights provide a data-driven foundation for improving operational efficiency and minimizing service interruptions in the future."
 format: pdf
+fontsize: 12pt
+toc: true
 number-sections: true
 bibliography: references.bib
 ---
-
 ```{r}
 #| include: false
 #| warning: false
@@ -22,11 +23,11 @@ library(knitr)
 library(opendatatoronto)
 library(tidyverse)
 library(dplyr)
+library(lubridate)
 
 cleaned_data = read_csv(here::here('data/analysis_data/cleaned_subway_delay_data.csv'))
  
 ```
-
 # Introduction
 
 Public transit plays a vital role in the daily lives of millions of people in urban centers around the world. In Toronto, the subway system, operated by the Toronto Transit Commission (TTC), serves as a backbone for many commuters. However, delays in subway services can cause significant inconvenience and disrupt the city’s flow of traffic. In 2023, Toronto’s subway system faced numerous delays, which are the focus of this report.
@@ -43,10 +44,22 @@ The findings in this report are based on data-driven analyses and visualizations
 
 # Data {#sec-data}
 
-The data utilized in this report is sourced from Open Data Toronto and was imported using the opendatatoronto library [@gelfand2022]. The specific dataset used for analyzing TTC subway delays in Toronto is the "TTC Subway & SRT Train Service Delay Data" dataset [@toronto2024. All data analysis was conducted using R [@r2023], with the assistance of several key packages, including tidyverse [@wickham2019], dplyr [@wickham2023dplyr],here [@mueller2020] janitor [@firke2023], ggplot2 [@wickham2016], and knitr [@knitr].
+The data utilized in this report is sourced from Open Data Toronto and was imported using the opendatatoronto library [@gelfand2022]. The specific dataset used for analyzing TTC subway delays in Toronto is the "TTC Subway & SRT Train Service Delay Data" dataset [@toronto2024. All data analysis was conducted using R [@r2023], with the assistance of several key packages, including tidyverse [@wickham2019], dplyr [@wickham2023dplyr],here [@mueller2020] janitor [@firke2023], ggplot2 [@wickham2016], knitr [@knitr], and lubridate [@grolemund2011].
 
-To transform the raw data into a clean, analysis-ready format, several preprocessing steps were carried out using R. First, unnecessary columns that did not contribute to the analysis, such as metadata or irrelevant identifiers, were removed to streamline the dataset. Using the dplyr package, specific columns were selected based on relevance to subway delays, such as date, time, station, line, and delay duration. The data was further cleaned by handling any missing or inconsistent values with the janitor package to ensure data integrity. Any outliers or erroneous entries were also identified and either corrected or removed as appropriate. These steps allowed for the creation of a clean dataset, which provided a solid foundation for the subsequent analysis. The entire process was conducted through efficient R code, leveraging the functionality of packages like dplyr for filtering and selection, and janitor for data cleaning. 
+To transform the raw data into a clean, analysis-ready format, several preprocessing steps were carried out using R. First, unnecessary columns that did not contribute to the analysis, were removed to clean the dataset. Using the dplyr package, specific columns were selected based on relevance to subway delays, such as date, time, station, line, and delay duration. The data was further cleaned by handling any missing or inconsistent values with the janitor package to ensure data integrity. Any outliers or erroneous entries were also identified and either corrected or removed as appropriate. These steps allowed for the creation of a clean dataset, which provided a solid foundation for the analysis below. The entire process was conducted through efficient R code, leveraging the functionality of packages like dplyr for filtering and selection, and janitor for data cleaning.
 
+## Overview of the data
+
+```{r,echo=FALSE}
+#| label: "Toronto Subway Delays 2023 Data"
+#| fig-cap: "Sample of the Toronto subway's delay timer"
+#| echo: false
+
+# PREVIEW OF THE DATA
+cleaned_data[, 1:7] %>% head() %>% knitr::kable()
+```
+
+## Subway delays by day of the week
 ```{r,echo=FALSE}
 library(ggplot2)
 
@@ -62,8 +75,10 @@ ggplot(day_delay_summary, aes(x=Group.1, y=x)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-The bar chart shows the total minutes of delays across different days of the week, with Mondays experiencing the highest delay times at 10,494 minutes, followed closely by Thursday and Friday. These days likely face more operational challenges due to higher ridership at the start and end of the workweek. In contrast, weekends see fewer delays, possibly because of lower ridership and reduced service frequency, leading to less strain on the subway system. \\ \\
+The study of subway delays on days of the week uncovers a noticeable trend linked to how weekdays and weekends unfold in terms of commuter patterns and travel demand shifts within the city's transit system. Observations show that Mondays encounter the most substantial delays and also other weekdays like Thursdays and Fridays due to heightened rider activity during the typical workweek when individuals travel to their workplaces. The uptick in passenger traffic during peak hours exerts pressure on subway operations by causing trains and busier platforms along, with prolonged boarding processes that collectively contribute to amplified service disruptions. During peak hours when there is demand for subway services issues like mechanical problems or signal interruptions tend to cause bigger disruptions compared to weekends. A reason weekends experience fewer delays possibly because fewer people use the subway due to less frequent service and reduced ridership. With a number of commuters relying on the subway during weekends the system runs more smoothly with less strain resulting in better train operations. Moreover weekend schedules often incorporate planned maintenance activities that have impact since there are fewer passengers traveling. The difference, between weekdays and weekends shows how commuter traffic affects the reliability of subway services. Weekdays experience frequent and severe delays during rush hour demands compared to weekends when operations are lighter and services run more smoothly. 
 
+
+## Subway delays by subway line
 ```{r,echo=FALSE}
 # Aggregating the data by subway line
 line_delay_summary <- aggregate(cleaned_data$`Min Delay`, by=list(cleaned_data$Line), FUN=sum)
@@ -77,8 +92,11 @@ ggplot(line_delay_summary, aes(x=Group.1, y=x)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-The bar chart shows the total delay minutes per subway line, with the Yonge-University (YU) line experiencing the most delays, followed by the Bloor-Danforth (BD) line. The high delay times on the YU Line are likely due to its status as one of the busiest lines, serving downtown Toronto and major commuter hubs. The BD Line also faces substantial delays, reflecting its heavy operational load. In contrast, other lines such as the Sheppard (SRT) experience significantly fewer delays, likely due to lower ridership or reduced service frequency. \\ \\
 
+The Yonge University (Y U) and Bloor Danforth (B D) subway routes encounter delays mainly because they are the most heavily used and vital transportation links in Toronto city center and surrounding regions. These subway lines pass through populated neighborhoods and major transit junctions like downtown Toronto serving as crucial lifelines for the millions of people who rely on them daily for their commutes. Specifically the Y U Line provides access to locations such, as Union Station, financial centers and popular spots leading to congestion during busy periods. The BD Line runs through the city connecting neighborhoods from east to west. Is essential for many commuters getting to work or school and carrying out their daily routines efficiently. The large number of passengers using these lines presents difficulties like longer boarding times and crowded platforms along with frequent train delays. Furthermore the substantial ridership on these routes amplifies the effects of disruptions as any delays have a cascading effect throughout the system given the heavy dependence, on these crucial lines. On the hand the Sheppard line (SRT) has fewer delays compared to others mainly because it caters to smaller communities and operates with less frequent service thus easing the burden, on infrastructure and operations. 
+
+
+## Subway delays by top 10 stations
 ```{r,echo=FALSE}
 # Aggregating and selecting the top 10 stations with the most delays
 station_delay_summary <- aggregate(cleaned_data$`Min Delay`, by=list(cleaned_data$Station), FUN=sum)
@@ -93,42 +111,58 @@ ggplot(top_10_stations, aes(x=Group.1, y=x)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-The bar chart highlights the top 10 stations with the highest delay minutes, with Kennedy BD Station leading, followed by Eglinton and Kipling stations. Kennedy, as a major terminal on the Bloor-Danforth line, likely faces operational challenges contributing to its delays. Eglinton Station, undergoing significant construction due to transit expansions, also experiences high delays. Key transfer hubs like Kipling and Bloor, which handle large passenger volumes, further contribute to increased delays at these stations.
+
+The top ten stations experiencing the delays are mainly major terminals and transfer points in Torontos subway system – with Kennedy BD Station leading the list due to its operational intricacies and heavy passenger traffic flow through connections with other lines, like the Scarborough RT and the Bloor Danforth line. Currently at Eglinton Station construction is underway for the Eglinton Crosstown LRT project causing disruptions that affect passenger flow and train operations resulting in increased delays. Kipling and Bloor stations are also facing delays as they serve as transfer points for various subway and bus routes, with many commuters switching lines or modes of transportation. The clustering of travelers at these locations results in crowded platforms and increases the likelihood of delays since even small interruptions can lead to a domino effect that impacts the reliability of the service provided there.This scenario occurs mainly in stations serving as central transit points due to their passenger flow and intricate operations along, with occasional infrastructure issues that collectively add up to prolonged delay times. 
+
+
+## Subway delays Peak and off peak hours
+```{r,echo=FALSE}
+# Convert the 'Time' column from character to proper time format using lubridate's hms function
+cleaned_data$Time <- hms::as_hms(cleaned_data$Time)
+
+# Define peak hours (7:00 - 9:00 and 16:00 - 19:00) as well as off-peak hours
+cleaned_data <- cleaned_data %>%
+  mutate(
+    period = case_when(
+      (hour(Time) >= 7 & hour(Time) < 9) | (hour(Time) >= 16 & hour(Time) < 19) ~ "Peak",
+      TRUE ~ "Off-Peak"
+    )
+  )
+
+# Summarize the total delay minutes for Peak and Off-Peak
+delay_summary <- cleaned_data %>%
+  group_by(period) %>%
+  summarise(total_delay_minutes = sum(`Min Delay`, na.rm = TRUE))
+
+# Plotting the total delay for Peak vs. Off-Peak
+ggplot(delay_summary, aes(x = period, y = total_delay_minutes, fill = period)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Total Subway Delay Minutes: Peak vs Off-Peak Hours",
+       x = "Time Period",
+       y = "Total Delay Minutes") +
+  theme_minimal()
+
+
+```
+
+The examination of subway disruptions in Toronto indicates a contrast between busy and quieter times of the day when it comes to delays. With less crowded periods encountering much longer total delay durations compared to peak hours despite the higher number of passengers and operational demands during those busier times when the transit system seems to focus on efficiency and manages to have fewer delays than, during the less busy times. Delays are more common during quieter hours due to frequent services and maintenance work being carried out then to avoid disruptions during prime commute times also fewer resources being available could lead to longer delays when problems occur. It seems that the system handles high demand situations effectively but could possibly do better at reducing interruptions during quieter times to maintain service all day long. 
+
 
 # Results
 
-The analysis of subway delays in Toronto for 2023 reveals significant patterns across days of the week, subway lines, and specific stations. Mondays experienced the most delays, followed closely by Thursday and Friday, suggesting that the beginning and end of the workweek are the most challenging periods for subway operations. This pattern may be linked to increased ridership and operational pressures during these days. In terms of subway lines, the Yonge-University (YU) line recorded the highest delay minutes, likely due to its extensive coverage of key commuter areas, including downtown Toronto, where traffic and operational complexities are higher. The Bloor-Danforth (BD) line also saw substantial delays, reflecting its heavy usage and operational load. Meanwhile, other lines, such as the Sheppard (SRT), experienced fewer delays, which can be attributed to lower ridership and less frequent service. At the station level, Kennedy BD Station led in delay minutes, followed by Eglinton and Kipling stations, all of which are either major transfer hubs or subject to ongoing construction, leading to operational disruptions. The results highlight the need for focused operational improvements at key lines and stations, particularly during peak periods at the start and end of the workweek. \\
+The analysis of Toronto subway delays was conducted across four key aspects: delays by day of the week, subway lines, stations, and peak vs. off-peak hours. Each of these aspects offers unique insights into the operational challenges faced by the Toronto Transit Commission (TTC) in managing subway services.
 
-```{r,echo=FALSE}
-# Install required packages if necessary
-# install.packages("ggplot2")
-library(ggplot2)
-library(dplyr)
-cleaned_subway_data <- cleaned_data
+Delays by Day of the Week: The analysis revealed that Mondays experience the highest total delay minutes, likely due to the surge of passengers at the start of the workweek. Both Thursday and Friday also show elevated delays, potentially reflecting increased traffic as commuters prepare for the weekend. Weekends, on the other hand, see fewer delays, which can be attributed to lower ridership and reduced service frequency.
 
-# Assuming cleaned_subway_data is already loaded, we'll remove all rows with zero delay
-cleaned_subway_data <- cleaned_subway_data %>% 
-  filter(`Min Delay` > 0)
+Delays by Subway Line:The Yonge-University (YU) and Bloor-Danforth (BD) lines experienced the most delays. As two of the busiest lines serving major commuter hubs in downtown Toronto, they face greater operational challenges and are more susceptible to disruptions due to overcrowding and high service frequency. In contrast, smaller lines, like the Sheppard and Scarborough RT, showed fewer delays, likely due to lower ridership and fewer trains.
 
-# Create a new 'Category' column combining 'Line' and 'Day of the Week'
-cleaned_subway_data <- cleaned_subway_data %>%
-  mutate(Category = paste(Line, Day))
+Delays by Subway Station: Kennedy Station on the Bloor-Danforth (BD) line had the highest recorded delays, followed by Eglinton and Kipling stations. As key transfer and terminal points, these stations handle large volumes of passengers, which can cause bottlenecks, particularly during rush hours. Eglinton Station, which is undergoing heavy construction due to transit expansion projects, is another hotspot for delays.
 
-# Aggregate the data by 'Category'
-combined_summary <- cleaned_subway_data %>%
-  group_by(Category) %>%
-  summarize(Delay = sum(`Min Delay`))
+Peak vs. Off-Peak Hours:The final analysis compared peak and off-peak hours, revealing that off-peak periods experienced significantly higher total delay minutes. This might be due to reduced service frequency during off-peak hours, which makes each delay more impactful. Scheduled maintenance, often performed during off-peak hours, and fewer operational resources could also contribute to the higher delay times.
 
-# Plot the combined data without zero delays
-ggplot(combined_summary, aes(x = Category, y = Delay, fill = Category)) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
-  labs(title = "Combined Subway Delay Analysis by Line and Day of the Week (2023)",
-       x = "Line and Day of the Week", y = "Total Delay (Minutes)") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  coord_flip()  # Flip for better readability if needed
+The overall analysis gives an overview of subway disruptions in Toronto for the year 2023.The frequency of delays is greatly impacted by the day of the week – particularly Mondays and the latter part of the workweek witness the highest delays.The Yonge-University and Bloor-Danforth lines face delays owing to their popularity and frequent train services. Specific stations like Kennedy and Eglinton serve as congestion points. Accumulate more delay minutes due to their vital positions in the transit system. During times when there are passengers traveling such as off hours or low traffic periods of the day there tends to be more delays in terms of total minutes being experienced due, to possibly having fewer trains running and maintenance work taking place. The thorough analysis offers an overview of subway disruptions in Toronto for the year 2023 with delays being significantly impacted by various factors and influences within the system. The analysis points out areas for operational enhancements to concentrate on such as improving off hours service and handling delays at busy stations like Kennedy and Eglinton to enhance the overall efficiency of the system better. Likewise tackling the issues on subway lines like YU and BD could lead to fewer disruptions especially during peak hours, with heavy passenger traffic. 
 
-```
+
 
 # Discussion
 
